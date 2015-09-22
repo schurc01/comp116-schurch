@@ -1,19 +1,20 @@
-ASSIGNMENT 1 -- PACKET SLEUTH
+ASSIGNMENT 1 - Packet Sleuth
 =============================
+
 By: Susannah Church
 -------------------
 COMP 116 Computer Systems Security
 ----------------------------------
 
 set1.pcap
-=========
+----------
 1. How many packets are there in this set?
 861 
 
 2. What protocol is used to transfer files from PC to server?
 FTP
 
-3. Why is the protocol insecure?
+3. Why is the protocol insecure? <br />
 FTP sends files and credentials in plain text, with no encryption.
 
 4. What is the secure alternative to the protocol used?
@@ -22,23 +23,23 @@ sftp
 5. What is the IP address of the server?
 192.168.1.8
 
-6. What was the username and password used to give access to the server?
+6. What was the username and password used to give access to the server? <br />
 username: defcon
-password: m1ngisablowhard
+  password: m1ngisablowhard
 
 7. How many files were transferred?
 6
 
-8. What are the names of the files transferred?
-COaqQWnU8AAwX3K.jpg
-CDkv69qUsAAq8zN.jpg
-CNsAEaYUYAARuaj.jpg
-CLu-m0MwoAAgjkr.jpg
-CKBXgmOWcAAtc4u.jpg
-CJoWmoOUkAAAYpx.jpg
+8. What are the names of the files transferred? <br />
+COaqQWnU8AAwX3K.jpg <br />
+CDkv69qUsAAq8zN.jpg <br />
+CNsAEaYUYAARuaj.jpg <br />
+CLu-m0MwoAAgjkr.jpg <br />
+CKBXgmOWcAAtc4u.jpg <br />
+CJoWmoOUkAAAYpx.jpg <br />
 
 set2.pcap
-=========
+----------
 10. How many packets are there in this set?
 77982
 
@@ -46,15 +47,16 @@ set2.pcap
 set?
 12
 
-12. Briefly describe how you found the password/username pairs.
+12. Briefly describe how you found the password/username pairs. <br />
 I used ettercap to find the username-passowrd pair, and dsniff
-to find the anonymous accounts. Commands:
+to find the anonymous accounts. <br />
 
-dsniff -p set2.pcap
-ettercap -T -r set2.pcap | grep "PASS" 
+Commands: <br />
+dsniff -p set2.pcap <br />
+ettercap -T -r set2.pcap | grep "PASS" <br />
 
 13. For each user/password pair, identify protocol, server IP, port
-and the corresponding domain name
+and the corresponding domain name 
 
 Protocol: UDP
 Server IP: 192.168.1.200
@@ -87,13 +89,13 @@ Server IP: 87.120.13.118
 Domain name: 76.0d.78.57.d6.net
 Port number: 143
 
-14. How many are legitimate?
+14. How many are legitimate? <br />
 Only 1 is a NON-generic account, and we know it is a legitimate
 username-password pair because the server sends back an "OK LOGIN
 OK" message after the user enters it according to the IMAP request.
 
 set3.pcap
-=========
+---------
 15. I found 11.
 
 16.
@@ -168,7 +170,7 @@ The amazonaws pair could not be verified.
 about each packet to a file called question_18.txt.
 
 General Questions
-=================
+-----------------
 19. How did you verify the successful user/pass combinations?
 I searched on wireshark for a frame that contains the password
 and then followed the TCP stream to reconstruct whether the
