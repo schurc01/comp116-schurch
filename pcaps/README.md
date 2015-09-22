@@ -96,9 +96,10 @@ OK" message after the user enters it according to the IMAP request.
 
 set3.pcap
 ---------
-15) I found 11.
+15) How many username/password combinations are there? <br /> 
+I found 11.
 
-16)
+16) List Protocol, Server, Domain, Port.
 
 Protocol: UDP
 Server: 10.0.8.254
@@ -167,7 +168,7 @@ Port: 80
 Only 1, the forum.defcon.org pair.
 The amazonaws pair could not be verified.
 
-18) List all IP addresses/ Hostnames from set3.pcap <br /> 
+18) List all IP addresses/ Hostnames from set3.pcap. <br /> 
 See attached file. I used tcpdump to output information
 about each packet to a file called question_18.txt.
 
