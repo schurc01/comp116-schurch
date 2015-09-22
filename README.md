@@ -164,7 +164,8 @@ Port: 80
 17. Only 1, the forum.defcon.org pair.
 The amazonaws pair could not be verified.
 
-18. See attached file.
+18. See attached file. I used tcpdump to output information
+about each packet to a file called question_18.txt.
 
 General Questions
 =================
