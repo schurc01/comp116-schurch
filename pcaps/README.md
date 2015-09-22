@@ -56,7 +56,7 @@ dsniff -p set2.pcap <br />
 ettercap -T -r set2.pcap | grep "PASS" <br />
 
 13) For each user/password pair, identify protocol, server IP, port
-and the corresponding domain name 
+and the corresponding domain name. 
 
 Protocol: UDP
 Server IP: 192.168.1.200
