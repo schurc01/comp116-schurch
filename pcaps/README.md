@@ -45,7 +45,7 @@ set2.pcap
 
 11) How many plaintext username-password pairs are there in this packet
 set?
-12
+6
 
 12) Briefly describe how you found the password/username pairs. <br />
 I used ettercap to find the username-passowrd pair, and dsniff
