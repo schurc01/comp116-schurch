@@ -64,8 +64,10 @@ cap.stream.each do |p|
             alert(++num_incs, "XMAS scan", pkt.ip_saddr, pkt.ip_proto, pkt.payload)
 	elsif nmap_scan?(pkt)
             alert(++num_incs, "NMAP scan", pkt.ip_saddr, pkt.ip_proto, pkt.payload)
-	else # nikto_scan?(pkt)
+	elsif nikto_scan?(pkt)
             alert(++num_incs, "NIKTO scan", pkt.ip_saddr, pkt.ip_proto, pkt.payload)
-        end
+        else 
+            alert(-1, "NORMAL", pkt.ip_saddr, pkt.ip_proto, pkt.payload)
+	end
     end
 end
