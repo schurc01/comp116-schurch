@@ -87,18 +87,20 @@ num_incs = 0
 if ARGV[1]
     # Read from web server log
     File.open(ARGV[1]).each_line do |line|
+        ip = line.slice(0..(line.index('- -')))
+        payload = line.slice((line.index('- -'))..-1)
         if nmap_scan?(line)
-            alert(num_incs += 1, "NMAP scan", line.slice(0..(line.index('- -'))), "PROTO" , line.slice((line.index('- -'))..-1))
+            alert(num_incs += 1, "NMAP scan", ip,"PROTO", payload)
 	elsif nikto_scan?(line)
-            alert(num_incs += 1, "NIKTO scan", line.slice(0..(line.index('- -'))), "PROTO" , line.slice((line.index('- -'))..-1))
+            alert(num_incs += 1, "NIKTO scan", ip, "PROTO", payload)
         elsif masscan?(line)
-            alert(num_incs += 1, "masscan", line.slice(0..(line.index('- -'))), "PROTO" , line.slice((line.index('- -'))..-1))
+            alert(num_incs += 1, "masscan", ip, "PROTO", payload)
         elsif shellshock?(line)
-            alert(num_incs += 1, "shellshock vulnerability attack", line.slice(0..(line.index('- -'))), "PROTO" , line.slice((line.index('- -'))..-1))
+            alert(num_incs += 1, "shellshock vulnerability attack", ip, "PROTO", payload)
 	elsif phpMyAdmin?(line)
-            alert(num_incs += 1, "Someone looking for phpMyAdmin stuff", line.slice(0..(line.index('- -'))), "PROTO" , line.slice((line.index('- -'))..-1))
+            alert(num_incs += 1, "Someone looking for phpMyAdmin stuff", ip, "PROTO", payload)
         elsif shellcode?(line)
-            alert(num_incs += 1, "shellcode", line.slice(0..(line.index('- -'))), "PROTO" , line.slice((line.index('- -'))..-1))
+            alert(num_incs += 1, "shellcode", ip, "PROTO", payload)
         end
     end
 else
