@@ -66,9 +66,9 @@ end
 
 # Checks for anything related to phpMyAdmin.
 def phpMyAdmin?(line)
-    s1 = admin
-    s2 = php
-    s3 = pma
+    s1 = "admin"
+    s2 = "php"
+    s3 = "pma"
     return line.scan(/#{s1}|#{s2}|#{s3}/).length > 0 
 end
 
@@ -89,13 +89,13 @@ if ARGV[1]
     File.open(ARGV[1]).each_line do |line|
         if nmap_scan?(line)
             alert(num_incs += 1, "NMAP scan", line.slice(0..(line.index('- -'))), "PROTO" , line.slice((line.index('- -'))..-1))
-	elsif nikto_scan?(pkt)
+	elsif nikto_scan?(line)
             alert(num_incs += 1, "NIKTO scan", line.slice(0..(line.index('- -'))), "PROTO" , line.slice((line.index('- -'))..-1))
         elsif masscan?(line)
             alert(num_incs += 1, "masscan", line.slice(0..(line.index('- -'))), "PROTO" , line.slice((line.index('- -'))..-1))
         elsif shellshock?(line)
             alert(num_incs += 1, "shellshock vulnerability attack", line.slice(0..(line.index('- -'))), "PROTO" , line.slice((line.index('- -'))..-1))
-	elsif phpmyadmin?(line)
+	elsif phpMyAdmin?(line)
             alert(num_incs += 1, "Someone looking for phpMyAdmin stuff", line.slice(0..(line.index('- -'))), "PROTO" , line.slice((line.index('- -'))..-1))
         elsif shellcode?(line)
             alert(num_incs += 1, "shellcode", line.slice(0..(line.index('- -'))), "PROTO" , line.slice((line.index('- -'))..-1))
@@ -108,17 +108,17 @@ else
         pkt = PacketFu::Packet.parse(p)
         if pkt.is_ip? && pkt.is_tcp?
             if null_scan?(pkt)
-                alert(num_incs += 1, "NULL scan", pkt)
+                alert(num_incs += 1, "NULL scan", pkt.ip_saddr, pkt.proto.last, pkt.payload)
 	    elsif fin_scan?(pkt)
-                alert(num_incs += 1, "FIN scan", pkt)
+                alert(num_incs += 1, "FIN scan", pkt.ip_saddr, pkt.proto.last, pkt.payload)
 	    elsif xmas_scan?(pkt)
-                alert(num_incs += 1, "XMAS scan", pkt)
+                alert(num_incs += 1, "XMAS scan", pkt.ip_saddr, pkt.proto.last, pkt.payload)
 	    elsif nmap_scan?(pkt)
-                alert(num_incs += 1, "NMAP scan", pkt.payload)
+                alert(num_incs += 1, "NMAP scan", pkt.ip_saddr, pkt.proto.last, pkt.payload)
 	    elsif nikto_scan?(pkt)
-                alert(num_incs += 1, "NIKTO scan", pkt.payload)
+                alert(num_incs += 1, "NIKTO scan", pkt.ip_saddr, pkt.proto.last, pkt.payload)
             elsif ccard_leak?(pkt)
-                alert(num_incs += 1, "Credit Card Leak", pkt)
+                alert(num_incs += 1, "Credit Card Leak", pkt.ip_saddr, pkt.proto.last, pkt.payload)
             end
         end
     end
