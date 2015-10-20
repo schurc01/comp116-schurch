@@ -85,22 +85,26 @@ end
 
 # Function to output alert about incident.
 def alert(inc_num, incident, ip, proto, payload)
-puts "#{inc_num}. ALERT #{incident} is detected from #{ip} (#{proto}) (#{payload})!"
+    puts "#{inc_num}. ALERT #{incident} is detected from #{ip} (#{proto}) (#{payload})!"
 end
 
 
 num_incs = 0
 if ARGV[1]
-    # Read from web server log
-    # Format of the log file
+    # Read from web server log.
+    
+    # Format of the log file.
     format = '%h %l %u %t \"%r\" %>s %b \"%{Referer}i\" \"%{User-Agent}i\"'
     parser = ApacheLogRegex.new(format)
 
     File.readlines(ARGV[1]).collect do |line|
+        # Parses lines into hashtable to easily split relevant info.
         hash = parser.parse(line)
+        
         ip = hash["%h"]
         payload = hash["%{User-Agent}i"]
-	if nmap_scan?(line)
+	
+        if nmap_scan?(line)
             alert(num_incs += 1, "NMAP scan", ip,"HTTP", payload)
 	elsif nikto_scan?(line)
             alert(num_incs += 1, "NIKTO scan", ip, "HTTP", payload)
@@ -119,6 +123,8 @@ else
     cap = PacketFu::Capture.new(:start => true, :iface => 'eth0', :promisc => true)
     cap.stream.each do |p|
         pkt = PacketFu::Packet.parse(p)
+
+        # Only need to worry about TCP Packets.
         if pkt.is_ip? && pkt.is_tcp?
             if null_scan?(pkt)
                 alert(num_incs += 1, "NULL scan", pkt.ip_saddr, pkt.proto.last, pkt.payload)
