@@ -31,47 +31,50 @@ def xmas_scan?(pkt)
 end
 
 # Checks for nmap scan.
-def nmap_scan?(pkt)
+def nmap_scan?(p)
     # case insensitive scan for any packet
     # payload containing signature "Nmap..."
-    return pkt.payload.scan(/Nmap.../).length > 0
+    return p.scan(/Nmap.../).length > 0
 end
 
 # Checks for nikto scan.
-def nikto_scan?(pkt)
+def nikto_scan?(p)
     # Case insensitive scan for any packet
     # containing "nikto".
-    return pkt.payload.scan(/nikto/).length > 0
+    return p.scan(/nikto/).length > 0
 end
 
 # Checks for credit card number in packet's binary data.
-def ccard_leak?(pkt)
+def ccard_leak?(p)
     # Can only find Visa, Mastercard, American Express
     # and discover for sake of simplicity.
     # Regex credit: www.richardsramblings.com/regex/credit-card-numbers/
     # Note: only find numbers with no spaces/dashes
-    return pkt.payload.scan(/\b(?:3[47]\d|(?:4\d|5[1-5]|65)\d{2}|6011)\d{12}\b/).length > 0
+    return p.scan(/\b(?:3[47]\d|(?:4\d|5[1-5]|65)\d{2}|6011)\d{12}\b/).length > 0
 end
 
 # Checks for a masscan attack.
-def masscan?(pkt)
-    return pkt.payload.scan(/masscan/).length > 0
+def masscan?(line)
+    return line.scan(/masscan/).length > 0
 end
 
 # Checks for a shellshock attack.
 
-def shellshock?(pkt)
-    return pkt.payload.scan(/shellshock-scan/).length > 0
+def shellshock?(line)
+    return line.scan(/shellshock-scan/).length > 0
 end
 
 # Checks for anything related to phpMyAdmin.
-def phpMyAdmin?(pkt)
-    return pkt.payload.scan(/phpMyAdmin/).length > 0 
+def phpMyAdmin?(line)
+    s1 = admin
+    s2 = php
+    s3 = pma
+    return line.scan(/#{s1}|#{s2}|#{s3}/).length > 0 
 end
 
 # Checks for shellcode injection.
-def shellcode?(pkt)
-    return pkt.payload.scan(/[\\x\h\h]+/).length > 0
+def shellcode?(line)
+    return line.scan(/[\\x\h\h]+/).length > 0
 end
 
 # Function to output alert about incident.
@@ -81,6 +84,10 @@ end
 
 if ARGV[0]
     # Read from web server log
+    File.open(ARGV[0]).each_line do |line|
+        puts line
+        puts "--------"
+    end
 else
     # Live Stream
     num_incs = 0
@@ -95,9 +102,9 @@ else
 	    elsif xmas_scan?(pkt)
                 alert(num_incs += 1, "XMAS scan", pkt)
 	    elsif nmap_scan?(pkt)
-                alert(num_incs += 1, "NMAP scan", pkt)
+                alert(num_incs += 1, "NMAP scan", pkt.payload)
 	    elsif nikto_scan?(pkt)
-                alert(num_incs += 1, "NIKTO scan", pkt)
+                alert(num_incs += 1, "NIKTO scan", pkt.payload)
             elsif ccard_leak?(pkt)
                 alert(num_incs += 1, "Credit Card Leak", pkt)
             end
