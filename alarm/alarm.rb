@@ -32,9 +32,9 @@ end
 
 # Checks for nmap scan.
 def nmap_scan?(pkt)
-    # case sensitive scan for any packet
+    # case insensitive scan for any packet
     # payload containing signature "Nmap..."
-    return pkt.payload.scan(/Nmap.../i).length > 0
+    return pkt.payload.scan(/Nmap.../).length > 0
 end
 
 # Checks for nikto scan.
@@ -46,6 +46,11 @@ end
 
 # Checks for credit card number in packet's binary data.
 def ccard_leak?(pkt)
+    # Can only find Visa, Mastercard, American Express
+    # and discover for sake of simplicity.
+    # Regex credit: www.richardsramblings.com/regex/credit-card-numbers/
+    # Note: only find numbers with no spaces/dashes
+    return pkt.payload.scan(/\b(?:3[47]\d|(?:4\d|5[1-5]|65)\d{2}|6011)\d{12}\b/).length > 0
 end
 
 # Checks for a masscan attack.
