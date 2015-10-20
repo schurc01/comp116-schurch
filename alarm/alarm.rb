@@ -34,14 +34,16 @@ end
 def nmap_scan?(p)
     # case insensitive scan for any packet
     # payload containing signature "Nmap..."
-    return p.scan(/Nmap.../).length > 0
+    puts p.payload
+    puts "in NMAP scan"
+    return p.payload.scan(/Nmap/).length > 0
 end
 
 # Checks for nikto scan.
 def nikto_scan?(p)
     # Case insensitive scan for any packet
     # containing "nikto".
-    return p.scan(/nikto/).length > 0
+    return p.payload.scan(/nikto/).length > 0
 end
 
 # Checks for credit card number in packet's binary data.
@@ -50,7 +52,7 @@ def ccard_leak?(p)
     # and discover for sake of simplicity.
     # Regex credit: www.richardsramblings.com/regex/credit-card-numbers/
     # Note: only find numbers with no spaces/dashes
-    return p.scan(/\b(?:3[47]\d|(?:4\d|5[1-5]|65)\d{2}|6011)\d{12}\b/).length > 0
+    return p.payload.scan(/\b(?:3[47]\d|(?:4\d|5[1-5]|65)\d{2}|6011)\d{12}\b/).length > 0
 end
 
 # Checks for a masscan attack.
@@ -87,21 +89,22 @@ num_incs = 0
 if ARGV[1]
     # Read from web server log
     File.open(ARGV[1]).each_line do |line|
-        ip = line.slice(0..(line.index('- -')))
-        payload = line.slice((line.index('- -'))..-1)
-        if nmap_scan?(line)
-            alert(num_incs += 1, "NMAP scan", ip,"PROTO", payload)
-	elsif nikto_scan?(line)
-            alert(num_incs += 1, "NIKTO scan", ip, "PROTO", payload)
-        elsif masscan?(line)
-            alert(num_incs += 1, "masscan", ip, "PROTO", payload)
-        elsif shellshock?(line)
-            alert(num_incs += 1, "shellshock vulnerability attack", ip, "PROTO", payload)
-	elsif phpMyAdmin?(line)
-            alert(num_incs += 1, "Someone looking for phpMyAdmin stuff", ip, "PROTO", payload)
-        elsif shellcode?(line)
-            alert(num_incs += 1, "shellcode", ip, "PROTO", payload)
-        end
+        #ip = line.slice(0..(line.index('- -')))
+        #payload = line.slice((line.index('- -'))..-1)
+        #if nmap_scan?(line)
+        #    alert(num_incs += 1, "NMAP scan", ip,"PROTO", payload)
+	#elsif nikto_scan?(line)
+        #    alert(num_incs += 1, "NIKTO scan", ip, "PROTO", payload)
+        #elsif masscan?(line)
+        #    alert(num_incs += 1, "masscan", ip, "PROTO", payload)
+        #elsif shellshock?(line)
+        #    alert(num_incs += 1, "shellshock vulnerability attack", ip, "PROTO", payload)
+	#elsif phpMyAdmin?(line)
+        #    alert(num_incs += 1, "Someone looking for phpMyAdmin stuff", ip, "PROTO", payload)
+        #elsif shellcode?(line)
+        #    alert(num_incs += 1, "shellcode", ip, "PROTO", payload)
+        #end
+        puts line
     end
 else
     # Live Stream
