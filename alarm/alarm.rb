@@ -55,19 +55,23 @@ end
 
 # Checks for a masscan attack.
 def masscan?(pkt)
-
+    return pkt.payload.scan(/masscan/).length > 0
 end
 
 # Checks for a shellshock attack.
+
 def shellshock?(pkt)
+    return pkt.payload.scan(/shellshock-scan/).length > 0
 end
 
 # Checks for anything related to phpMyAdmin.
 def phpMyAdmin?(pkt)
+    return pkt.payload.scan(/phpMyAdmin/).length > 0 
 end
 
 # Checks for shellcode injection.
 def shellcode?(pkt)
+    return pkt.payload.scan(/[\\x\h\h]+/).length > 0
 end
 
 # Function to output alert about incident.
