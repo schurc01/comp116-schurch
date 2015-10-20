@@ -55,6 +55,7 @@ end
 
 # Checks for a masscan attack.
 def masscan?(pkt)
+
 end
 
 # Checks for a shellshock attack.
@@ -93,6 +94,8 @@ else
                 alert(num_incs += 1, "NMAP scan", pkt)
 	    elsif nikto_scan?(pkt)
                 alert(num_incs += 1, "NIKTO scan", pkt)
+            elsif ccard_leak?(pkt)
+                alert(num_incs += 1, "Credit Card Leak", pkt)
             end
         end
     end
