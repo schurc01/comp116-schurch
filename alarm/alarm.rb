@@ -78,19 +78,31 @@ def shellcode?(line)
 end
 
 # Function to output alert about incident.
-def alert(inc_num, incident, pkt)
-puts "#{inc_num}. ALERT #{incident} is detected from #{pkt.ip_saddr} (#{pkt.proto.last}) (#{pkt.payload})!"
+def alert(inc_num, incident, ip, proto, payload)
+puts "#{inc_num}. ALERT #{incident} is detected from #{ip} (#{proto}) (#{payload})!"
 end
 
-if ARGV[0]
+
+num_incs = 0
+if ARGV[1]
     # Read from web server log
-    File.open(ARGV[0]).each_line do |line|
-        puts line
-        puts "--------"
+    File.open(ARGV[1]).each_line do |line|
+        if nmap_scan?(line)
+            alert(num_incs += 1, "NMAP scan", line.slice(0..(line.index('- -'))), "PROTO" , line.slice((line.index('- -'))..-1))
+	elsif nikto_scan?(pkt)
+            alert(num_incs += 1, "NIKTO scan", line.slice(0..(line.index('- -'))), "PROTO" , line.slice((line.index('- -'))..-1))
+        elsif masscan?(line)
+            alert(num_incs += 1, "masscan", line.slice(0..(line.index('- -'))), "PROTO" , line.slice((line.index('- -'))..-1))
+        elsif shellshock?(line)
+            alert(num_incs += 1, "shellshock vulnerability attack", line.slice(0..(line.index('- -'))), "PROTO" , line.slice((line.index('- -'))..-1))
+	elsif phpmyadmin?(line)
+            alert(num_incs += 1, "Someone looking for phpMyAdmin stuff", line.slice(0..(line.index('- -'))), "PROTO" , line.slice((line.index('- -'))..-1))
+        elsif shellcode?(line)
+            alert(num_incs += 1, "shellcode", line.slice(0..(line.index('- -'))), "PROTO" , line.slice((line.index('- -'))..-1))
+        end
     end
 else
     # Live Stream
-    num_incs = 0
     cap = PacketFu::Capture.new(:start => true, :iface => 'eth0', :promisc => true)
     cap.stream.each do |p|
         pkt = PacketFu::Packet.parse(p)
