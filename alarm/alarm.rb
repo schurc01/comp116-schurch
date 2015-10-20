@@ -63,22 +63,26 @@ def alert(inc_num, incident, source, proto, payload)
 puts "#{inc_num}. ALERT #{incident} is detected from #{source} (#{proto}) (#{payload})!"
 end
 
-# Live Stream
-num_incs = 0
-cap = PacketFu::Capture.new(:start => true, :iface => 'eth0', :promisc => true)
-cap.stream.each do |p|
-    pkt = PacketFu::Packet.parse(p)
-    if pkt.is_ip? && pkt.is_tcp?
-        if null_scan?(pkt)
-            alert(num_incs += 1, "NULL scan", pkt.ip_saddr, pkt.proto.last, pkt.payload)
-	elsif fin_scan?(pkt)
-            alert(num_incs += 1, "FIN scan", pkt.ip_saddr, pkt.proto.last, pkt.payload)
-	elsif xmas_scan?(pkt)
-            alert(num_incs += 1, "XMAS scan", pkt.ip_saddr, pkt.proto.last, pkt.payload)
-	elsif nmap_scan?(pkt)
-            alert(num_incs += 1, "NMAP scan", pkt.ip_saddr, pkt.proto.last, pkt.payload)
-	elsif nikto_scan?(pkt)
-            alert(num_incs += 1, "NIKTO scan", pkt.ip_saddr, pkt.proto.last, pkt.payload)
+if ARGV[0]
+    # Read from web server log
+else
+    # Live Stream
+    num_incs = 0
+    cap = PacketFu::Capture.new(:start => true, :iface => 'eth0', :promisc => true)
+    cap.stream.each do |p|
+        pkt = PacketFu::Packet.parse(p)
+        if pkt.is_ip? && pkt.is_tcp?
+            if null_scan?(pkt)
+                alert(num_incs += 1, "NULL scan", pkt.ip_saddr, pkt.proto.last, pkt.payload)
+	    elsif fin_scan?(pkt)
+                alert(num_incs += 1, "FIN scan", pkt.ip_saddr, pkt.proto.last, pkt.payload)
+	    elsif xmas_scan?(pkt)
+                alert(num_incs += 1, "XMAS scan", pkt.ip_saddr, pkt.proto.last, pkt.payload)
+	    elsif nmap_scan?(pkt)
+                alert(num_incs += 1, "NMAP scan", pkt.ip_saddr, pkt.proto.last, pkt.payload)
+	    elsif nikto_scan?(pkt)
+                alert(num_incs += 1, "NIKTO scan", pkt.ip_saddr, pkt.proto.last, pkt.payload)
+            end
         end
-     end
+    end
 end
