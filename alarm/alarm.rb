@@ -56,17 +56,20 @@ end
 
 # Checks for a masscan attack.
 def masscan?(line)
+    # Searches for masscan signature.
     return line.scan(/masscan/).length > 0
 end
 
 # Checks for a shellshock attack.
-
 def shellshock?(line)
+    # Searches for signature () { :; }
+    # with starting characters.
     return line.scan(//(/)/).length > 0
 end
 
 # Checks for anything related to phpMyAdmin.
 def phpMyAdmin?(line)
+    # Searches for two most common signatures.
     s1 = "phpmyadmin"
     s2 = "pma"
     return line.scan(/#{s1}|#{s2}/).length > 0 
@@ -74,6 +77,7 @@ end
 
 # Checks for shellcode injection.
 def shellcode?(line)
+    # Searches for shellcode of the form (\x{hex}{hex})+
     return line.scan(/[\\x\h\h]+/).length > 0
 end
 
@@ -90,17 +94,17 @@ if ARGV[1]
         ip = line.slice(0..(line.index('- -')))
         payload = line.slice((line.index('- -'))..-1)
         if nmap_scan?(line)
-            alert(num_incs += 1, "NMAP scan", ip,"PROTO", payload)
+            alert(num_incs += 1, "NMAP scan", ip,"HTTP", payload)
 	elsif nikto_scan?(line)
-            alert(num_incs += 1, "NIKTO scan", ip, "PROTO", payload)
+            alert(num_incs += 1, "NIKTO scan", ip, "HTTP", payload)
         elsif masscan?(line)
-            alert(num_incs += 1, "masscan", ip, "PROTO", payload)
+            alert(num_incs += 1, "masscan", ip, "HTTP", payload)
         elsif shellshock?(line)
-            alert(num_incs += 1, "shellshock vulnerability attack", ip, "PROTO", payload)
+            alert(num_incs += 1, "shellshock vulnerability attack", ip, "HTTP", payload)
 	elsif phpMyAdmin?(line)
-            alert(num_incs += 1, "Someone looking for phpMyAdmin stuff", ip, "PROTO", payload)
+            alert(num_incs += 1, "Someone looking for phpMyAdmin stuff", ip, "HTTP", payload)
         elsif shellcode?(line)
-            alert(num_incs += 1, "shellcode", ip, "PROTO", payload)
+            alert(num_incs += 1, "shellcode", ip, "HTTP", payload)
         end
         puts line
     end
