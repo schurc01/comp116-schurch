@@ -1,4 +1,6 @@
 require 'packetfu'
+require 'apachelogregex'
+
 # Incident Alarm
 # COMP 116: Security
 # By: Susie Church
@@ -31,27 +33,27 @@ def xmas_scan?(pkt)
 end
 
 # Checks for nmap scan.
-def nmap_scan?(pkt)
+def nmap_scan?(payload)
     # case insensitive scan for any packet
     # payload containing signature "Nmap..."
-    return pkt.payload.scan(/Nmap/).length > 0
+    return payload.scan(/Nmap/).length > 0
 end
 
 # Checks for nikto scan.
-def nikto_scan?(pkt)
+def nikto_scan?(payload)
     # Case insensitive scan for any packet
     # containing "nikto".
-    return pkt.payload.scan(/Nikto/).length > 0
+    return payload.scan(/Nikto/).length > 0
 end
 
 # Checks for credit card number in packet's binary data.
-def ccard_leak?(pkt)
+def ccard_leak?(payload)
     # Can only find Visa, Mastercard, American Express
     # and discover for sake of simplicity.
     # Regex credit: www.richardsramblings.com/regex/credit-card-numbers/
     # Note: only find numbers with no spaces/dashes
     cc_regex = "\b(?:3[47]\d|(?:4\d|5[1-5]|65)\d{2}|6011)\d{12}\b"
-    return pkt.payload.scan(/#{cc_regex}/).length > 0
+    return payload.scan(/#{cc_regex}/).length > 0
 end
 
 # Checks for a masscan attack.
@@ -64,7 +66,7 @@ end
 def shellshock?(line)
     # Searches for signature () { :; }
     # with starting characters.
-    return line.scan(//(/)/).length > 0
+    return line.scan(/\(\)/).length > 0
 end
 
 # Checks for anything related to phpMyAdmin.
@@ -77,8 +79,8 @@ end
 
 # Checks for shellcode injection.
 def shellcode?(line)
-    # Searches for shellcode of the form (\x{hex}{hex})+
-    return line.scan(/[\\x\h\h]+/).length > 0
+    # Searches for shellcode of the form \x22\x4d\ etc..
+    return line.scan(/(\\x\h\h)+/).length > 0
 end
 
 # Function to output alert about incident.
@@ -90,23 +92,27 @@ end
 num_incs = 0
 if ARGV[1]
     # Read from web server log
-    File.open(ARGV[1]).each_line do |line|
-        ip = line.slice(0..(line.index('- -')))
-        payload = line.slice((line.index('- -'))..-1)
-        if nmap_scan?(line)
+    # Format of the log file
+    format = '%h %l %u %t \"%r\" %>s %b \"%{Referer}i\" \"%{User-Agent}i\"'
+    parser = ApacheLogRegex.new(format)
+
+    File.readlines(ARGV[1]).collect do |line|
+        hash = parser.parse(line)
+        ip = hash["%h"]
+        payload = hash["%{User-Agent}i"]
+	if nmap_scan?(line)
             alert(num_incs += 1, "NMAP scan", ip,"HTTP", payload)
 	elsif nikto_scan?(line)
             alert(num_incs += 1, "NIKTO scan", ip, "HTTP", payload)
         elsif masscan?(line)
-            alert(num_incs += 1, "masscan", ip, "HTTP", payload)
+            alert(num_incs += 1, "Masscan", ip, "HTTP", payload)
         elsif shellshock?(line)
-            alert(num_incs += 1, "shellshock vulnerability attack", ip, "HTTP", payload)
+            alert(num_incs += 1, "Shellshock vulnerability attack", ip, "HTTP", payload)
 	elsif phpMyAdmin?(line)
             alert(num_incs += 1, "Someone looking for phpMyAdmin stuff", ip, "HTTP", payload)
         elsif shellcode?(line)
-            alert(num_incs += 1, "shellcode", ip, "HTTP", payload)
+            alert(num_incs += 1, "Shellcode", ip, "HTTP", payload)
         end
-        puts line
     end
 else
     # Live Stream
@@ -120,11 +126,11 @@ else
                 alert(num_incs += 1, "FIN scan", pkt.ip_saddr, pkt.proto.last, pkt.payload)
 	    elsif xmas_scan?(pkt)
                 alert(num_incs += 1, "XMAS scan", pkt.ip_saddr, pkt.proto.last, pkt.payload)
-	    elsif nmap_scan?(pkt)
+	    elsif nmap_scan?(pkt.payload)
                 alert(num_incs += 1, "NMAP scan", pkt.ip_saddr, pkt.proto.last, pkt.payload)
-	    elsif nikto_scan?(pkt)
+	    elsif nikto_scan?(pkt.payload)
                 alert(num_incs += 1, "NIKTO scan", pkt.ip_saddr, pkt.proto.last, pkt.payload)
-            elsif ccard_leak?(pkt)
+            elsif ccard_leak?(pkt.payload)
                 alert(num_incs += 1, "Credit Card Leak", pkt.ip_saddr, pkt.proto.last, pkt.payload)
             end
         end
